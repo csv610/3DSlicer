@@ -16,7 +16,11 @@
 #include <iomanip>
 
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 #include "displaylistPrimitive.h"
 #include <opencsg.h>
 
@@ -886,7 +890,7 @@ void menu(int value) {
         OpenCSG::setOption(OpenCSG::OffscreenSetting, OpenCSG::FrameBufferObject);
         break;
     case OFFSCREEN_PBUFFER:
-        OpenCSG::setOption(OpenCSG::OffscreenSetting, OpenCSG::PBuffer);
+        OpenCSG::setOption(OpenCSG::OffscreenSetting, OpenCSG::FrameBufferObject);
         break;
     default:
         break;
@@ -945,24 +949,33 @@ void init()
 
 void Usage( const string &exe)
 {
-    cout << exe << " meshfile numslices winWidth frameRatio" << endl;
-
+    cout << "Usage: " << exe << " <meshfile> [numslices] [winSize] [frameRatio]" << endl;
+    cout << "Parameters:" << endl;
+    cout << "  meshfile   : Path to the input 3D model (e.g., .off file)" << endl;
+    cout << "  numslices  : Number of slices (default: 100)" << endl;
+    cout << "  winSize    : Window size in pixels (default: 1000)" << endl;
+    cout << "  frameRatio : View scaling factor (default: 1.0)" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv)
 {
-    if( argc != 5) {
+    if (argc >= 2 && (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help")) {
+        Usage(argv[0]);
+        return 0;
+    }
+
+    if( argc < 2 || argc > 5) {
         Usage(argv[0] );
         return 1;
     }
 
-    filename  = argv[1];
-    numSlices = atoi(argv[2]);
-    winHeight = atoi(argv[3] );
-    winWidth  = winHeight;
-    frameRatio = atof( argv[4] );
+    filename   = argv[1];
+    numSlices  = (argc > 2) ? atoi(argv[2]) : 100;
+    winHeight  = (argc > 3) ? atoi(argv[3]) : 1000;
+    winWidth   = winHeight;
+    frameRatio = (argc > 4) ? atof(argv[4]) : 1.0;
 
     glutInit(&argc, argv);
 
