@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.11)
+project(3DSlicer LANGUAGES CXX)
+
+if(APPLE)
+    add_definitions(-DGL_SILENCE_DEPRECATION)
+endif()
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_subdirectory(src/OpenCSG)
+add_subdirectory(app)
