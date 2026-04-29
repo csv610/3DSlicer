@@ -22,25 +22,6 @@ A GPU-accelerated tool for generating cross-sectional slices of 3D triangular me
 brew install glew cmake
 ```
 
-## External Libraries
-
-This project uses the following external libraries:
-
-| Library | Version | Source | Notes |
-|---------|---------|--------|-------|
-| **OpenCSG** | 1.8.2 | Bundled | CSG rendering (latest) |
-| **GLAD** | Bundled | Inside OpenCSG | OpenGL loader |
-| **RenderTexture** | Custom | src/RenderTexture/ | Internal render-to-texture utility |
-| **GLEW** | System | find_package | OpenGL extension handling |
-| **GLUT** | System | find_package | Window management |
-| **OpenGL** | System | find_package | Graphics API |
-
-### Bundled Libraries
-OpenCSG and GLAD are bundled in `src/OpenCSG/` and are kept up to date with the latest releases.
-
-### System Libraries
-GLEW, GLUT, and OpenGL are detected via CMake and depend on your system installation.
-
 ## Building the Project
 
 The project uses a standard CMake build workflow:
