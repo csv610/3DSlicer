@@ -23,6 +23,9 @@
 #endif
 #include "displaylistPrimitive.h"
 #include <opencsg.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 using namespace std;
 
@@ -127,70 +130,53 @@ void readMesh()
     mesh.edges.clear();
     mesh.faces.clear();
 
-    ifstream ifile(filename.c_str(), ios::in);
-    if( ifile.fail() ) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+    if (!scene) {
         cout << "Error: Can't open input file " << endl;
         return;
     }
 
-    string str;
-    ifile >> str;
-    if( str != "OFF") {
-        cout << "Error: input file not in the off format" << endl;
+    if (scene->mNumMeshes < 1) {
+        cout << "Warning: Input file has no meshes" << endl;
         return;
     }
 
-    int numPoints, numFaces, numEdges;
-    ifile >> numPoints >> numFaces >> numEdges;
+    aiMesh* meshData = scene->mMeshes[0];
+    size_t numPoints = meshData->mNumVertices;
+    size_t numFaces = meshData->mNumFaces;
 
-    if( numPoints < 1) {
+    if (numPoints < 1) {
         cout << "Warning: Input file has no points " << endl;
         return;
     }
 
-    if( numPoints ) {
-        float x, y, z;
-        mesh.nodes.resize(numPoints);
-        for( size_t i = 0; i < numPoints; i++) {
-            ifile >> x >> y >> z;
-            mesh.nodes[i] = {x,y,z};
-        }
+    mesh.nodes.resize(numPoints);
+    for (size_t i = 0; i < numPoints; i++) {
+        aiVector3D v = meshData->mVertices[i];
+        mesh.nodes[i] = {v.x, v.y, v.z};
     }
 
-    int n0, n1;
-    if( numFaces) {
-        set<pair<size_t,size_t>> eSet;
-
+    if (numFaces) {
+        set<pair<size_t, size_t>> eSet;
         mesh.faces.resize(numFaces);
 
-        int nn;
-        for( size_t i = 0; i < numFaces; i++) {
-            ifile >> nn; assert(nn == 3);
-            for( int j = 0; j < nn; j++)
-                ifile >> mesh.faces[i][j];
-            for( int j = 0; j < nn; j++) {
-                int v0 = mesh.faces[i][(j+1)%nn];
-                int v1 = mesh.faces[i][(j+2)%nn];
-                int vmin = min(v0,v1);
-                int vmax = max(v0,v1);
-                eSet.insert( make_pair(vmin,vmax));
+        for (size_t i = 0; i < numFaces; i++) {
+            aiFace& face = meshData->mFaces[i];
+            mesh.faces[i] = {static_cast<int>(face.mIndices[0]), static_cast<int>(face.mIndices[1]), static_cast<int>(face.mIndices[2])};
+
+            for (int j = 0; j < 3; j++) {
+                int v0 = face.mIndices[(j + 1) % 3];
+                int v1 = face.mIndices[(j + 2) % 3];
+                int vmin = min(v0, v1);
+                int vmax = max(v0, v1);
+                eSet.insert(make_pair(vmin, vmax));
             }
         }
         mesh.edges.resize(eSet.size());
         int index = 0;
-        for(auto edge: eSet) {
-            n0 = edge.first;
-            n1 = edge.second;
-            assert( n0 != n1);
-            mesh.edges[index++]  = {n0,n1};
-        }
-    }
-
-    if( numEdges ) {
-        mesh.edges.resize(numEdges);
-        for(size_t i = 0; i < numEdges; i++) {
-            ifile >> n0 >> n1;
-            mesh.edges[i]  = {n0,n1};
+        for (auto& edge : eSet) {
+            mesh.edges[index++] = {static_cast<int>(edge.first), static_cast<int>(edge.second)};
         }
     }
 }
