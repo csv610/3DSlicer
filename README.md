@@ -6,6 +6,7 @@ A GPU-accelerated tool for generating cross-sectional slices of 3D triangular me
 
 - **GPU-Accelerated Slicing**: Uses OpenGL stencil buffer techniques for high-performance Boolean operations.
 - **Robust Boolean Operations**: Integrated with [OpenCSG](http://www.opencsg.org/) for constructive solid geometry.
+- **Wide Model Support**: Integrated with [Assimp](https://github.com/assimp/assimp) to support `.off`, `.obj`, `.stl`, `.ply`, and more.
 - **Interactive Viewer**: GLUT-based interface for visualizing meshes and their slices.
 - **C++20**: Updated to modern C++ standards.
 
@@ -16,11 +17,16 @@ A GPU-accelerated tool for generating cross-sectional slices of 3D triangular me
 - **OpenGL**
 - **GLEW**
 - **GLUT** (FreeGLUT recommended on Linux; native GLUT on macOS)
+- **Assimp**
 
 ### Installation on macOS (Homebrew)
 ```bash
-brew install glew cmake
+brew install glew cmake assimp
 ```
+
+## Documentation
+
+For a detailed explanation of the theory behind GPU-accelerated slicing and a step-by-step setup guide, please refer to the [User Guide](docs/UserGuide.md).
 
 ## Building the Project
 
